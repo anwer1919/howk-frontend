@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import StoreHeader from "@/components/store/StoreHeader";
 import StoreProductCard from "@/components/store/StoreProductCard";
-import { getCategoryBySlug, getProductsByCategory } from "@/lib/store-data";
+import { getProductsByCategory, getCategoryBySlug } from "@/lib/store-data";
+import { t, getCurrentLocale } from "@/lib/translations";
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -12,11 +13,17 @@ export default async function CategoryPage({ params }: Props) {
   const category = getCategoryBySlug(categorySlug);
   if (!category) notFound();
   const products = getProductsByCategory(categorySlug);
+  const locale = getCurrentLocale();
+  const isAr = locale === "ar";
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--howk-black)" }} dir="rtl">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--howk-black)" }}
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <StoreHeader />
-      
+
       <section
         className="text-center"
         style={{
@@ -35,7 +42,7 @@ export default async function CategoryPage({ params }: Props) {
             marginBottom: "8px",
           }}
         >
-          {category.name}
+          {isAr ? category.name : category.shortName}
         </h1>
         <p
           style={{
@@ -65,7 +72,7 @@ export default async function CategoryPage({ params }: Props) {
                   color: "var(--howk-muted)",
                 }}
               >
-                لا توجد منتجات في هذا التصنيف حاليًا
+                {isAr ? "لا توجد منتجات في هذا التصنيف حاليًا" : "No products in this category yet"}
               </p>
             </div>
           ) : (
@@ -92,7 +99,7 @@ export default async function CategoryPage({ params }: Props) {
             color: "var(--howk-muted)",
           }}
         >
-          جميع الحقوق محفوظة لدار حوك © {new Date().getFullYear()}
+          {t("copyright", locale)} © {new Date().getFullYear()}
         </p>
       </footer>
     </div>

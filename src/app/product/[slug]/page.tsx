@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import StoreHeader from "@/components/store/StoreHeader";
 import StoreProductCard from "@/components/store/StoreProductCard";
 import { getProductBySlug, getCategoryBySlug, STORE_PRODUCTS, formatSAR } from "@/lib/store-data";
+import { t, getCurrentLocale } from "@/lib/translations";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -15,9 +16,15 @@ export default async function ProductPage({ params }: Props) {
   const related = STORE_PRODUCTS.filter(
     (p) => p.category === product.category && p.slug !== product.slug
   ).slice(0, 3);
+  const locale = getCurrentLocale();
+  const isAr = locale === "ar";
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--howk-black)" }} dir="rtl">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--howk-black)" }}
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <StoreHeader />
 
       <div
@@ -62,7 +69,7 @@ export default async function ProductPage({ params }: Props) {
                 marginBottom: "12px",
               }}
             >
-              {category.name}
+              {isAr ? category.name : category.shortName}
             </p>
           )}
 
@@ -106,7 +113,9 @@ export default async function ProductPage({ params }: Props) {
                 color: "var(--howk-muted)",
               }}
             >
-              قطعة فاخرة من دار حوك، صُنعت بعناية فائقة لتجمع بين الأناقة والدفء.
+              {isAr
+                ? "قطعة فاخرة من دار حوك، صُنعت بعناية فائقة لتجمع بين الأناقة والدفء."
+                : "A luxurious piece from HOWK, meticulously crafted to combine elegance and warmth."}
             </p>
           </div>
 
@@ -125,9 +134,10 @@ export default async function ProductPage({ params }: Props) {
               borderRadius: "2px",
               color: "var(--howk-gold)",
               backgroundColor: "transparent",
+              textDecoration: "none",
             }}
           >
-            أكملي الطلب عبر المتجر الرسمي
+            {isAr ? "أكملي الطلب عبر المتجر الرسمي" : "Complete your order via the official store"}
           </a>
         </div>
       </div>
@@ -149,7 +159,7 @@ export default async function ProductPage({ params }: Props) {
                 color: "var(--howk-ivory)",
               }}
             >
-              قد يعجبكِ أيضًا
+              {isAr ? "قد يعجبكِ أيضًا" : "You May Also Like"}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3" style={{ gap: "clamp(16px, 2vw, 24px)" }}>
               {related.map((p) => (
@@ -174,7 +184,7 @@ export default async function ProductPage({ params }: Props) {
             color: "var(--howk-muted)",
           }}
         >
-          جميع الحقوق محفوظة لدار حوك © {new Date().getFullYear()}
+          {t("copyright", locale)} © {new Date().getFullYear()}
         </p>
       </footer>
     </div>
