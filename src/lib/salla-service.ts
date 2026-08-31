@@ -129,4 +129,8 @@ export async function getLiveStoreProductsByCategory(categorySlug: string): Prom
     return products.filter((p) => p.salePrice !== undefined);
   }
   return products.filter((p) => p.category === categorySlug);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a041ea7405757cb725f4eb693583445b00268d11
