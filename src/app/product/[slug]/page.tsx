@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import StoreHeader from "@/components/store/StoreHeader";
 import StoreProductCard from "@/components/store/StoreProductCard";
-import { getProductBySlug, getCategoryBySlug, STORE_PRODUCTS, formatSAR } from "@/lib/store-data";
+import { getCategoryBySlug, formatSAR } from "@/lib/store-data";
+import { getLiveStoreProductBySlug, getLiveStoreProductsByCategory } from "@/lib/salla-service";
 import { t, getCurrentLocale } from "@/lib/translations";
 
 interface Props {
@@ -10,12 +11,11 @@ interface Props {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getLiveStoreProductBySlug(slug);
   if (!product) notFound();
   const category = getCategoryBySlug(product.category);
-  const related = STORE_PRODUCTS.filter(
-    (p) => p.category === product.category && p.slug !== product.slug
-  ).slice(0, 3);
+  const categoryProducts = await getLiveStoreProductsByCategory(product.category);
+  const related = categoryProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
   const locale = getCurrentLocale();
   const isAr = locale === "ar";
 

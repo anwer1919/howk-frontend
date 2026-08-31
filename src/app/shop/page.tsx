@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import StoreHeader from "@/components/store/StoreHeader";
 import StoreProductCard from "@/components/store/StoreProductCard";
-import { STORE_PRODUCTS } from "@/lib/store-data";
+import { getLiveStoreProducts } from "@/lib/salla-service";
 import { t, getCurrentLocale } from "@/lib/translations";
 
 export const metadata: Metadata = {
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   description: "جميع منتجات دار حوك الفاخرة",
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getLiveStoreProducts();
   const locale = getCurrentLocale();
   const isAr = locale === "ar";
 
@@ -49,7 +50,7 @@ export default function ShopPage() {
       >
         <div className="mx-auto" style={{ maxWidth: "1180px" }}>
           <div className="grid grid-cols-2 md:grid-cols-3" style={{ gap: "clamp(16px, 2vw, 24px)" }}>
-            {STORE_PRODUCTS.map((product) => (
+            {products.map((product) => (
               <StoreProductCard key={product.slug} product={product} />
             ))}
           </div>

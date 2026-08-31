@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import StoreHeader from "@/components/store/StoreHeader";
 import StoreProductCard from "@/components/store/StoreProductCard";
-import { getProductsByCategory, getCategoryBySlug } from "@/lib/store-data";
+import { getCategoryBySlug } from "@/lib/store-data";
+import { getLiveStoreProductsByCategory } from "@/lib/salla-service";
 import { t, getCurrentLocale } from "@/lib/translations";
 
 interface Props {
@@ -12,7 +13,7 @@ export default async function CategoryPage({ params }: Props) {
   const { category: categorySlug } = await params;
   const category = getCategoryBySlug(categorySlug);
   if (!category) notFound();
-  const products = getProductsByCategory(categorySlug);
+  const products = await getLiveStoreProductsByCategory(categorySlug);
   const locale = getCurrentLocale();
   const isAr = locale === "ar";
 
