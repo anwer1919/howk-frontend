@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "جميع منتجات دار حوك الفاخرة",
 };
 
+// إجبار التحديث في كل زيارة (بدل التوليد الثابت وقت الـ Build فقط)
+// مهم عشان أسعار ومخزون سلة تتحدث فعليًا وتظهر في Vercel Logs وقت الزيارة
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage() {
   const products = await getLiveStoreProducts();
   const locale = getCurrentLocale();
