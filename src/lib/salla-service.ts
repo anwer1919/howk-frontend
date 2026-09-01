@@ -36,7 +36,10 @@ interface SallaRawProduct {
 // جلب كل منتجات سلة الخام مرة واحدة (إن توفر توكن)، بكاش 5 دقائق
 async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
   const token = process.env.SALLA_API_TOKEN;
-  if (!token) return null;
+  if (!token) {
+    console.warn("[salla-service] SALLA_API_TOKEN is not set in this environment");
+    return null;
+  }
 
   try {
     const all: SallaRawProduct[] = [];
@@ -79,7 +82,11 @@ async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
 
 async function getSkuMap(): Promise<Map<string, SallaRawProduct> | null> {
   const items = await fetchSallaProducts();
-  if (!items) return null;
+  if (!items) {
+    console.warn("[salla-service] no items returned — check SALLA_API_TOKEN or store has 0 products");
+    return null;
+  }
+  console.log(`[salla-service] fetched ${items.length} products from Salla, sample SKUs:`, items.slice(0, 5).map((i) => i.sku));
   const map = new Map<string, SallaRawProduct>();
   for (const item of items) {
     if (item.sku) map.set(item.sku.toUpperCase(), item);
