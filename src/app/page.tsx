@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import StoreHeader from "@/components/store/StoreHeader";
 import HalaGrid from "@/components/hala/HalaGrid";
 import HalaHelp from "@/components/hala/HalaHelp";
@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   description:
     "مجموعة هَالَة - ستة ألوان من الجاكيتات الطويلة الفاخرة. حضوركِ يبدأ قبل وصولكِ.",
 };
+
+// إجبار التحديث في كل زيارة بدل التوليد الثابت وقت الـ Build فقط
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const locale = getCurrentLocale();
