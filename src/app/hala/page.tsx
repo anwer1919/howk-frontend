@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   },
 };
 
+// إجبار التحديث في كل زيارة بدل التوليد الثابت وقت الـ Build فقط
+export const dynamic = "force-dynamic";
+
 export default async function HalaPage() {
   // الأسعار والمخزون والصور: ديناميكياً من سلة (جهة الخادم)
   const liveProducts = await getHalaLiveProducts();
