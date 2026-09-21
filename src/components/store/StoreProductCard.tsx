@@ -45,7 +45,7 @@ export default function StoreProductCard({ product }: Props) {
                 borderRadius: "2px",
               }}
             >
-              ???
+              {"\u062E\u0635\u0645"}
             </div>
           )}
         </div>
@@ -74,7 +74,7 @@ export default function StoreProductCard({ product }: Props) {
           </div>
           {!product.inStock && (
             <p style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
-              ???? ??????
+              {"\u0646\u0641\u0630\u062A \u0627\u0644\u0643\u0645\u064A\u0629"}
             </p>
           )}
         </div>

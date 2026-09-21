@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: Props) {
               }}
             >
               {isAr
-                ? "???? ????? ?? ??? ???? ????? ?????? ????? ????? ??? ??????? ??????."
+                ? "\u0642\u0637\u0639\u0629 \u0641\u0627\u062E\u0631\u0629 \u0645\u0646 \u062F\u0627\u0631 \u062D\u0648\u0643\u060C \u0635\u064F\u0646\u0639\u062A \u0628\u0639\u0646\u0627\u064A\u0629 \u0641\u0627\u0626\u0642\u0629 \u0644\u062A\u062C\u0645\u0639 \u0628\u064A\u0646 \u0627\u0644\u0623\u0646\u0627\u0642\u0629 \u0648\u0627\u0644\u062F\u0641\u0621."
                 : "A luxurious piece from HOWK, meticulously crafted to combine elegance and warmth."}
             </p>
           </div>
@@ -131,7 +131,7 @@ export default async function ProductPage({ params }: Props) {
               textDecoration: "none",
             }}
           >
-            {isAr ? "????? ????? ??? ?????? ??????" : "Complete your order via the official store"}
+            {isAr ? "\u0623\u0643\u0645\u0644\u064A \u0627\u0644\u0637\u0644\u0628 \u0639\u0628\u0631 \u0627\u0644\u0645\u062A\u062C\u0631 \u0627\u0644\u0631\u0633\u0645\u064A" : "Complete your order via the official store"}
           </a>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Props) {
                 color: "var(--howk-ivory)",
               }}
             >
-              {isAr ? "?? ?????? ?????" : "You May Also Like"}
+              {isAr ? "\u0642\u062F \u064A\u0639\u062C\u0628\u0643\u064D \u0623\u064A\u0636\u064B\u0627" : "You May Also Like"}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3" style={{ gap: "clamp(16px, 2vw, 24px)" }}>
               {related.map((p) => (
