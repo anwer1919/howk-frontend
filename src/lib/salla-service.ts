@@ -1,9 +1,3 @@
-// ============================================================
-// خدمة سلة - جهة الخادم فقط (Server-side)
-// مصدر الحقيقة الوحيد للأسعار والمخزون والصور
-// تُستخدم لكل الكتالوج (هَالَة + بقية المنتجات) عبر مطابقة SKU
-// ============================================================
-
 import { HALA_PRODUCTS } from "./hala-data";
 import { STORE_PRODUCTS, type StoreProduct } from "./store-data";
 
@@ -16,30 +10,26 @@ export interface HalaLiveProduct {
   inStock: boolean;
 }
 
-// شكل الاستجابة الفعلي من سلة (Admin API v2) — الأسعار كلها objects لا أرقام
-interface SallaMoney {
-  amount: number;
-  currency?: string;
-}
-
 interface SallaRawProduct {
   sku?: string;
-  price?: SallaMoney;
-  sale_price?: SallaMoney;
-  regular_price?: SallaMoney;
-  quantity?: number | string;
+  price?: number;
+  sale_price?: number;
+  quantity?: number;
   url?: string;
-  main_image?: string;
-  images?: { url: string; main?: boolean }[];
+  images?: { url: string }[];
+  name?: string;
 }
 
-// جلب كل منتجات سلة الخام مرة واحدة (إن توفر توكن)، بكاش 5 دقائق
 async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
   const token = process.env.SALLA_API_TOKEN;
+  
   if (!token) {
-    console.warn("[salla-service] SALLA_API_TOKEN is not set in this environment");
+    console.log("[SALLA] ? No SALLA_API_TOKEN in env");
     return null;
   }
+
+  console.log("[SALLA] ?? Fetching products from Salla API...");
+  console.log("[SALLA] Token prefix:", token.substring(0, 20) + "...");
 
   try {
     const all: SallaRawProduct[] = [];
@@ -47,24 +37,29 @@ async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
     const perPage = 100;
 
     while (page <= 5) {
-      const res = await fetch(
-        `https://api.salla.dev/admin/v2/products?per_page=${perPage}&page=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-          next: { revalidate: 300 },
-        }
-      );
+      const url = `https://api.salla.dev/admin/v2/products?per_page=${perPage}&page=${page}`;
+      console.log(`[SALLA] ?? GET ${url}`);
+      
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        cache: "no-store", // ?? ??? ???? - ???? ?????
+        next: { revalidate: 0 },
+      });
+
+      console.log(`[SALLA] ?? Response status: ${res.status}`);
 
       if (!res.ok) {
-        // مهم: نطبع سبب الفشل في لوج فيرسل عشان نقدر نشخص (401 = توكن غلط/منتهي، 403 = صلاحية ناقصة)
-        console.error(`[salla-service] fetch failed: ${res.status} ${res.statusText}`);
+        const errorText = await res.text();
+        console.log(`[SALLA] ? Error ${res.status}: ${errorText.substring(0, 200)}`);
         break;
       }
 
       const json = await res.json();
+      console.log(`[SALLA] ?? Page ${page}:`, json?.pagination?.total || 0, "total products");
+      
       const items: SallaRawProduct[] = json?.data ?? [];
       all.push(...items);
 
@@ -73,9 +68,15 @@ async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
       page += 1;
     }
 
+    console.log(`[SALLA] ? Total fetched: ${all.length} products`);
+    
+    if (all.length > 0) {
+      console.log("[SALLA] ?? First 3 SKUs:", all.slice(0, 3).map(p => p.sku).join(", "));
+    }
+
     return all.length ? all : null;
-  } catch (err) {
-    console.error("[salla-service] fetch error:", err);
+  } catch (err: any) {
+    console.log("[SALLA] ? Exception:", err.message);
     return null;
   }
 }
@@ -83,31 +84,17 @@ async function fetchSallaProducts(): Promise<SallaRawProduct[] | null> {
 async function getSkuMap(): Promise<Map<string, SallaRawProduct> | null> {
   const items = await fetchSallaProducts();
   if (!items) {
-    console.warn("[salla-service] no items returned — check SALLA_API_TOKEN or store has 0 products");
+    console.log("[SALLA] ??  Using fallback static data");
     return null;
   }
-  console.log(`[salla-service] fetched ${items.length} products from Salla, sample SKUs:`, items.slice(0, 5).map((i) => i.sku));
+
   const map = new Map<string, SallaRawProduct>();
   for (const item of items) {
     if (item.sku) map.set(item.sku.toUpperCase(), item);
   }
+  
+  console.log(`[SALLA] ???  SKU map built: ${map.size} entries`);
   return map;
-}
-
-// استخراج الصورة: main_image أولاً (أبسط)، وإلا أول عنصر في images[]
-function extractImage(match: SallaRawProduct): string | undefined {
-  if (match.main_image) return match.main_image;
-  const mainFromArray = match.images?.find((img) => img.main)?.url;
-  return mainFromArray ?? match.images?.[0]?.url;
-}
-
-// استخراج السعر الفعلي: sale_price لو موجود وقيمته > 0 وأقل من السعر الأساسي، وإلا price
-function extractPrice(match: SallaRawProduct, fallback: number): number {
-  const base = match.price?.amount;
-  const sale = match.sale_price?.amount;
-  if (sale && sale > 0 && (base === undefined || sale < base)) return sale;
-  if (base !== undefined) return base;
-  return fallback;
 }
 
 export async function getHalaLiveProducts(): Promise<HalaLiveProduct[]> {
@@ -115,13 +102,13 @@ export async function getHalaLiveProducts(): Promise<HalaLiveProduct[]> {
 
   return HALA_PRODUCTS.map((p) => {
     const match = skuMap?.get(p.internalId.toUpperCase());
-    const price = match ? extractPrice(match, 990) : 990;
+    const price = match ? Number(match.sale_price ?? match.price ?? 990) : 990;
 
     return {
       internalId: p.internalId,
       price,
-      formattedPrice: `${price.toFixed(2)} ر.س`,
-      imageUrl: match ? extractImage(match) : undefined,
+      formattedPrice: `${price.toFixed(2)} ?.?`,
+      imageUrl: match?.images?.[0]?.url ?? undefined,
       productUrl: match?.url ?? `/product/hala-${p.internalId.toLowerCase()}`,
       inStock: match ? Number(match.quantity ?? 1) > 0 : true,
     };
@@ -130,24 +117,31 @@ export async function getHalaLiveProducts(): Promise<HalaLiveProduct[]> {
 
 export async function getLiveStoreProducts(): Promise<StoreProduct[]> {
   const skuMap = await getSkuMap();
-  if (!skuMap) return STORE_PRODUCTS; // fallback: البيانات الثابتة كما هي
+  if (!skuMap) {
+    console.log("[SALLA] ?? Returning static STORE_PRODUCTS");
+    return STORE_PRODUCTS;
+  }
 
-  return STORE_PRODUCTS.map((p) => {
+  const result = STORE_PRODUCTS.map((p) => {
     const match = skuMap.get(p.sku.toUpperCase());
     if (!match) return p;
 
-    const price = extractPrice(match, p.price);
-    const saleAmount = match.sale_price?.amount;
-    const salePrice = saleAmount && saleAmount > 0 && saleAmount < price ? saleAmount : undefined;
+    const price = Number(match.price ?? p.price);
+    const salePrice =
+      match.sale_price && match.sale_price < price ? Number(match.sale_price) : undefined;
+
+    console.log(`[SALLA] ? Matched ${p.sku}: ${match.name}, price=${price}`);
 
     return {
       ...p,
       price,
       salePrice,
-      image: extractImage(match) ?? p.image,
+      image: match.images?.[0]?.url ?? p.image,
       inStock: match.quantity !== undefined ? Number(match.quantity) > 0 : p.inStock,
     };
   });
+
+  return result;
 }
 
 export async function getLiveStoreProductBySlug(slug: string): Promise<StoreProduct | undefined> {
