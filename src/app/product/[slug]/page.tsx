@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: Props) {
               }}
             >
               {isAr
-                ? "???? ????? ?? ??? ???? ????? ?????? ????? ????? ??? ??????? ??????."
+                ? "قطعة فاخرة من دار حوك، صُنعت بعناية فائقة لتجمع بين الأناقة والدفء."
                 : "A luxurious piece from HOWK, meticulously crafted to combine elegance and warmth."}
             </p>
           </div>
@@ -131,7 +131,7 @@ export default async function ProductPage({ params }: Props) {
               textDecoration: "none",
             }}
           >
-            {isAr ? "????? ????? ??? ?????? ??????" : "Complete your order via the official store"}
+            {isAr ? "أكملي الطلب عبر المتجر الرسمي" : "Complete your order via the official store"}
           </a>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Props) {
                 color: "var(--howk-ivory)",
               }}
             >
-              {isAr ? "?? ?????? ?????" : "You May Also Like"}
+              {isAr ? "قد يعجبكِ أيضًا" : "You May Also Like"}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3" style={{ gap: "clamp(16px, 2vw, 24px)" }}>
               {related.map((p) => (

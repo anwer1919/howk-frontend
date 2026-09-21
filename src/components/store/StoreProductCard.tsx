@@ -45,7 +45,7 @@ export default function StoreProductCard({ product }: Props) {
                 borderRadius: "2px",
               }}
             >
-              ???
+              خصم
             </div>
           )}
         </div>
@@ -74,7 +74,7 @@ export default function StoreProductCard({ product }: Props) {
           </div>
           {!product.inStock && (
             <p style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
-              ???? ??????
+              نفذت الكمية
             </p>
           )}
         </div>
